@@ -55,3 +55,17 @@
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
+
+@keyframes slideLeft {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-slide-left {
+  animation: slideLeft 25s linear infinite;
+}
+

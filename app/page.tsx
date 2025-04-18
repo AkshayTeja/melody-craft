@@ -1,11 +1,55 @@
+"use client"
 import Link from "next/link"
 import Image from "next/image"
+import Head from "next/head"
+import { useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Music, Sparkles, Zap, Layers, Users, Check, ChevronRight, Play, Download, Wand2 } from "lucide-react"
 
 export default function LandingPage() {
+  // Refs for animation sections
+  const featuresRef = useRef(null);
+  const howItWorksRef = useRef(null);
+  const pricingRef = useRef(null);
+  const testimonialsRef = useRef(null);
+
+  useEffect(() => {
+    // Simple animation on scroll
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all animation targets
+    if (featuresRef.current) observer.observe(featuresRef.current);
+    if (howItWorksRef.current) observer.observe(howItWorksRef.current);
+    if (pricingRef.current) observer.observe(pricingRef.current);
+    if (testimonialsRef.current) observer.observe(testimonialsRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-background via-background/95 to-background/90 text-foreground">
+      <Head>
+        <title>MelodyCraft - Create Beautiful Music with AI</title>
+        <link rel="icon" href="./icons8-music-16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+      </Head>
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/30 border-b border-white/10 supports-[backdrop-filter]:bg-background/10">
         <div className="container flex h-16 items-center justify-between py-4">
           <div className="flex items-center gap-2">
@@ -57,14 +101,14 @@ export default function LandingPage() {
         </div>
       </header>
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden py-20 md:py-32">
+        {/* Hero Section - Expanded to fill viewport */}
+        <section className="relative overflow-hidden py-20 md:py-32 min-h-[calc(100vh-4rem)]">
           <div className="absolute inset-0 bg-grid-white/5 [mask-image:linear-gradient(to_bottom,transparent,black)]" />
           <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20"></div>
-          <div className="container relative z-10 px-4 md:px-6">
-            <div className="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-16 xl:grid-cols-[1fr_600px]">
+          <div className="container relative z-10 px-4 md:px-6 h-full flex flex-col justify-center">
+            <div className="grid gap-12 lg:grid-cols-[1fr_500px] lg:gap-16 xl:grid-cols-[1fr_700px]">
               <div className="flex flex-col justify-center space-y-4">
-                <div className="inline-block rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md px-4 py-1 text-sm text-primary border border-primary/20">
+                <div className="inline-block w-fit rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md px-4 py-1 text-sm text-primary border border-primary/20">
                   Introducing MelodyCraft
                 </div>
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-gray-300">
@@ -100,26 +144,20 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
-              <div className="relative flex items-center justify-center lg:justify-end">
-                <div className="absolute -inset-4 bg-gradient-to-r from-primary/30 to-purple-500/30 rounded-xl blur-xl opacity-30"></div>
-                <div className="relative h-[350px] w-full max-w-[500px] rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-1 shadow-2xl">
+
+              <div className="relative flex items-center justify-start lg:justify-start"> {/* Shift video to left */}
+                <div className="absolute -inset-6 bg-gradient-to-r from-primary/30 to-purple-500/30 rounded-xl blur-xl opacity-30"></div>
+                <div className="relative h-[400px] w-full max-w-[700px] rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-1 shadow-2xl overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <Image
-                      src="/placeholder.svg?height=350&width=500"
-                      alt="MelodyCraft AI Interface"
-                      width={500}
-                      height={350}
-                      className="rounded-lg object-cover opacity-80"
+                    <video
+                      src="/video.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="rounded-lg object-cover opacity-90 w-full h-full"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Button
-                        size="icon"
-                        className="h-16 w-16 rounded-full bg-primary/80 backdrop-blur-md hover:bg-primary transition-colors duration-300"
-                      >
-                        <Play className="h-8 w-8" />
-                      </Button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -127,24 +165,60 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Brands Section */}
+
+
+        {/* Brands Section with actual musician logos */}
         <section className="border-y border-white/10 bg-white/5 backdrop-blur-md py-10">
           <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center gap-4">
+            <div className="flex flex-col items-center justify-center gap-6">
               <h2 className="text-center text-sm font-medium text-gray-400">
                 TRUSTED BY MUSICIANS AND CREATORS WORLDWIDE
               </h2>
               <div className="flex flex-wrap items-center justify-center gap-8">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="h-8 w-32 bg-white/5 backdrop-blur-md rounded-md border border-white/10" />
+                {[
+                  { name: "Universal Music", logo: "/api/placeholder/120/40" },
+                  { name: "Sony Music", logo: "/api/placeholder/120/40" },
+                  { name: "Warner Records", logo: "/api/placeholder/120/40" },
+                  { name: "Capitol Records", logo: "/api/placeholder/120/40" },
+                  { name: "Atlantic Records", logo: "/api/placeholder/120/40" }
+                ].map((brand, i) => (
+                  <div key={i} className="flex flex-col items-center gap-2">
+                    <div className="h-12 w-32 bg-white/10 backdrop-blur-md rounded-md border border-white/10 p-2 flex items-center justify-center">
+                      <Image 
+                        src={brand.logo} 
+                        alt={brand.name} 
+                        width={120} 
+                        height={40} 
+                        className="opacity-70 hover:opacity-100 transition-opacity duration-300"
+                      />
+                    </div>
+                    <span className="text-xs text-gray-400">{brand.name}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
+                {[
+                  "Grammy-winning producers",
+                  "Independent artists",
+                  "Film composers",
+                  "Game music creators",
+                  "Top 40 hitmakers"
+                ].map((creator, i) => (
+                  <div key={i} className="rounded-full bg-white/5 backdrop-blur-md px-4 py-1 text-xs text-gray-400 border border-white/10">
+                    {creator}
+                  </div>
                 ))}
               </div>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section id="features" className="py-20 relative overflow-hidden">
+        {/* Features Section with animation */}
+        <section 
+          id="features" 
+          ref={featuresRef}
+          className="py-20 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000"
+        >
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20 rounded-full"></div>
           <div className="container px-4 md:px-6 relative z-10">
             <div className="flex flex-col items-center justify-center gap-4 text-center">
@@ -197,7 +271,11 @@ export default function LandingPage() {
               ].map((feature, i) => (
                 <div
                   key={i}
-                  className="group relative flex flex-col items-center gap-2 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 text-center shadow-xl transition-all duration-300 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl"
+                  className="group relative flex flex-col items-center gap-2 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 text-center shadow-xl transition-all duration-500 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl translate-y-10 opacity-0"
+                  style={{ 
+                    transitionDelay: `${i * 100}ms`, 
+                    animation: `slideUp 0.5s ease-out forwards ${i * 100 + 300}ms` 
+                  }}
                 >
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
                   <div className="relative mb-4 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md p-3 border border-white/10">
@@ -211,8 +289,12 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* How It Works Section */}
-        <section id="how-it-works" className="bg-white/5 backdrop-blur-md py-20 relative overflow-hidden">
+        {/* How It Works Section with animation */}
+        <section 
+          id="how-it-works" 
+          ref={howItWorksRef}
+          className="bg-white/5 backdrop-blur-md py-20 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000"
+        >
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20 rounded-full"></div>
           <div className="container px-4 md:px-6 relative z-10">
             <div className="flex flex-col items-center justify-center gap-4 text-center">
@@ -249,7 +331,11 @@ export default function LandingPage() {
               ].map((step, i) => (
                 <div
                   key={i}
-                  className="group relative flex flex-col items-center gap-2 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 text-center shadow-xl transition-all duration-300 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl"
+                  className="group relative flex flex-col items-center gap-2 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 text-center shadow-xl transition-all duration-500 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl opacity-0"
+                  style={{ 
+                    transitionDelay: `${i * 200}ms`, 
+                    animation: `fadeIn 0.8s ease-out forwards ${i * 200 + 400}ms` 
+                  }}
                 >
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
                   <div className="absolute -top-6 rounded-full bg-gradient-to-r from-primary to-purple-500 px-4 py-2 text-xl font-bold text-white shadow-lg shadow-primary/20">
@@ -263,8 +349,12 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Pricing Section */}
-        <section id="pricing" className="py-20 relative overflow-hidden">
+        {/* Pricing Section with animation */}
+        <section 
+          id="pricing" 
+          ref={pricingRef}
+          className="py-20 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000"
+        >
           <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20 rounded-full"></div>
           <div className="container px-4 md:px-6 relative z-10">
             <div className="flex flex-col items-center justify-center gap-4 text-center">
@@ -318,7 +408,11 @@ export default function LandingPage() {
                     plan.popular
                       ? "bg-gradient-to-b from-white/10 to-white/5 border border-primary/50"
                       : "bg-white/5 border border-white/10"
-                  } p-6 shadow-xl transition-all duration-300 hover:shadow-primary/10 hover:shadow-2xl`}
+                  } p-6 shadow-xl transition-all duration-500 hover:shadow-primary/10 hover:shadow-2xl translate-x-10 opacity-0`}
+                  style={{ 
+                    transitionDelay: `${i * 150}ms`, 
+                    animation: `slideIn 0.6s ease-out forwards ${i * 150 + 300}ms` 
+                  }}
                 >
                   <div
                     className={`absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur ${
@@ -364,8 +458,12 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section id="testimonials" className="bg-white/5 backdrop-blur-md py-20 relative overflow-hidden">
+        {/* Testimonials Section with animation */}
+        <section 
+          id="testimonials" 
+          ref={testimonialsRef}
+          className="bg-white/5 backdrop-blur-md py-20 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000"
+        >
           <div className="absolute top-1/2 right-1/4 w-[600px] h-[600px] bg-gradient-to-bl from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20 rounded-full"></div>
           <div className="container px-4 md:px-6 relative z-10">
             <div className="flex flex-col items-center justify-center gap-4 text-center">
@@ -402,7 +500,11 @@ export default function LandingPage() {
               ].map((testimonial, i) => (
                 <div
                   key={i}
-                  className="group relative flex flex-col gap-4 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 shadow-xl transition-all duration-300 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl"
+                  className="group relative flex flex-col gap-4 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 shadow-xl transition-all duration-500 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl opacity-0"
+                  style={{ 
+                    transitionDelay: `${i * 150}ms`, 
+                    animation: `fadeScale 0.7s ease-out forwards ${i * 150 + 400}ms` 
+                  }}
                 >
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
                   <div className="relative rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 p-2 w-10 h-10 flex items-center justify-center">
@@ -560,6 +662,56 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* Global styles for animations */}
+      <style jsx global>{`
+        @keyframes slideUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateX(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+        
+        @keyframes fadeScale {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        .animate-in {
+          opacity: 1 !important;
+          transform: translateY(0) !important;
+        }
+      `}</style>
     </div>
   )
 }
