@@ -81,6 +81,10 @@ const config: Config = {
           "0%": { opacity: "0", transform: "translateY(50px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
+        "marquee": {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(calc(-100% - var(--gap)))" },
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -88,6 +92,7 @@ const config: Config = {
         "slide-in-right": "slide-in-right 0.5s ease-out forwards",
         "slide-in-left": "slide-in-left 0.5s ease-out forwards",
         "slide-in-up": "slide-in-up 0.5s ease-out forwards",
+        "marquee": "marquee var(--duration) infinite linear",
       },
     },
   },

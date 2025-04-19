@@ -4,7 +4,12 @@ import Image from "next/image"
 import Head from "next/head"
 import { useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
+import { Marquee } from "@/components/magicui/marquee";
+import { cn } from "@/lib/utils";
 import { Music, Sparkles, Zap, Layers, Users, Check, ChevronRight, Play, Download, Wand2 } from "lucide-react"
+import BrandMarqueeSection from "@/components/brands"
+
+
 
 export default function LandingPage() {
   // Refs for animation sections
@@ -13,6 +18,7 @@ export default function LandingPage() {
   const pricingRef = useRef(null);
   const testimonialsRef = useRef(null);
 
+ 
   useEffect(() => {
     // Simple animation on scroll
     const observerOptions = {
@@ -109,7 +115,7 @@ export default function LandingPage() {
             <div className="grid gap-12 lg:grid-cols-[1fr_500px] lg:gap-16 xl:grid-cols-[1fr_700px]">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="inline-block w-fit rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md px-4 py-1 text-sm text-primary border border-primary/20">
-                  Introducing MelodyCraft
+                  ✨ Introducing MelodyCraft
                 </div>
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-gray-300">
                   Create Beautiful Music with AI
@@ -168,50 +174,7 @@ export default function LandingPage() {
 
 
         {/* Brands Section with actual musician logos */}
-        <section className="border-y border-white/10 bg-white/5 backdrop-blur-md py-10">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center gap-6">
-              <h2 className="text-center text-sm font-medium text-gray-400">
-                TRUSTED BY MUSICIANS AND CREATORS WORLDWIDE
-              </h2>
-              <div className="flex flex-wrap items-center justify-center gap-8">
-                {[
-                  { name: "Universal Music", logo: "/api/placeholder/120/40" },
-                  { name: "Sony Music", logo: "/api/placeholder/120/40" },
-                  { name: "Warner Records", logo: "/api/placeholder/120/40" },
-                  { name: "Capitol Records", logo: "/api/placeholder/120/40" },
-                  { name: "Atlantic Records", logo: "/api/placeholder/120/40" }
-                ].map((brand, i) => (
-                  <div key={i} className="flex flex-col items-center gap-2">
-                    <div className="h-12 w-32 bg-white/10 backdrop-blur-md rounded-md border border-white/10 p-2 flex items-center justify-center">
-                      <Image 
-                        src={brand.logo} 
-                        alt={brand.name} 
-                        width={120} 
-                        height={40} 
-                        className="opacity-70 hover:opacity-100 transition-opacity duration-300"
-                      />
-                    </div>
-                    <span className="text-xs text-gray-400">{brand.name}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-4">
-                {[
-                  "Grammy-winning producers",
-                  "Independent artists",
-                  "Film composers",
-                  "Game music creators",
-                  "Top 40 hitmakers"
-                ].map((creator, i) => (
-                  <div key={i} className="rounded-full bg-white/5 backdrop-blur-md px-4 py-1 text-xs text-gray-400 border border-white/10">
-                    {creator}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
+        <BrandMarqueeSection/>
 
         {/* Features Section with animation */}
         <section 
@@ -308,70 +271,70 @@ export default function LandingPage() {
 
         {/* How It Works Section with animation */}
         <section 
-  id="how-it-works" 
-  ref={howItWorksRef}
-  className="bg-white/5 backdrop-blur-md py-20 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000"
->
-  <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20 rounded-full"></div>
-  <div className="container px-4 md:px-6 relative z-10">
-    <div className="flex flex-col items-center justify-center gap-4 text-center">
-      <div className="inline-block rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md px-4 py-1 text-sm text-primary border border-primary/20">
-        How It Works
-      </div>
-      <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-gray-300">
-        Create Music in Three Simple Steps
-      </h2>
-      <p className="max-w-[700px] text-gray-400 md:text-xl">
-        Our intuitive platform makes music creation accessible to everyone, regardless of experience level.
-      </p>
-    </div>
-    <div className="mt-16 grid gap-8 md:grid-cols-3">
-      {[
-        {
-          step: "01",
-          title: "Describe Your Vision",
-          description:
-            "Tell our AI what kind of music you want to create using text prompts or by uploading reference tracks.",
-        },
-        {
-          step: "02",
-          title: "Generate & Customize",
-          description:
-            "Our AI generates multiple options based on your input. Customize and refine until it's perfect.",
-        },
-        {
-          step: "03",
-          title: "Export & Share",
-          description:
-            "Download your creation in your preferred format or share it directly to streaming platforms.",
-        },
-      ].map((step, i) => (
-        <div
-          key={i}
-          className="step-card group relative flex flex-col items-center gap-4 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 pt-10 text-center shadow-xl transition-all duration-500 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl opacity-0"
-          style={{ 
-            transitionDelay: `${i * 200}ms`, 
-            animation: `fadeIn 0.8s ease-out forwards ${i * 200 + 400}ms` 
-          }}
+          id="how-it-works" 
+          ref={howItWorksRef}
+          className="bg-white/5 backdrop-blur-md py-20 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000"
         >
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
-          
-          <div className="z-10 text-xl font-bold text-white bg-gradient-to-r from-primary to-purple-500 px-4 py-1 rounded-full shadow-md">
-            {step.step}
-          </div>
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20 rounded-full"></div>
+          <div className="container px-4 md:px-6 relative z-10">
+            <div className="flex flex-col items-center justify-center gap-4 text-center">
+              <div className="inline-block rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md px-4 py-1 text-sm text-primary border border-primary/20">
+                How It Works
+              </div>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-gray-300">
+                Create Music in Three Simple Steps
+              </h2>
+              <p className="max-w-[700px] text-gray-400 md:text-xl">
+                Our intuitive platform makes music creation accessible to everyone, regardless of experience level.
+              </p>
+            </div>
+            <div className="mt-16 grid gap-8 md:grid-cols-3">
+              {[
+                {
+                  step: "01",
+                  title: "Describe Your Vision",
+                  description:
+                    "Tell our AI what kind of music you want to create using text prompts or by uploading reference tracks.",
+                },
+                {
+                  step: "02",
+                  title: "Generate & Customize",
+                  description:
+                    "Our AI generates multiple options based on your input. Customize and refine until it's perfect.",
+                },
+                {
+                  step: "03",
+                  title: "Export & Share",
+                  description:
+                    "Download your creation in your preferred format or share it directly to streaming platforms.",
+                },
+              ].map((step, i) => (
+                <div
+                  key={i}
+                  className="step-card group relative flex flex-col items-center gap-4 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 pt-10 text-center shadow-xl transition-all duration-500 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl opacity-0"
+                  style={{ 
+                    transitionDelay: `${i * 200}ms`, 
+                    animation: `fadeIn 0.8s ease-out forwards ${i * 200 + 400}ms` 
+                  }}
+                >
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+                  
+                  <div className="z-10 text-xl font-bold text-white bg-gradient-to-r from-primary to-purple-500 px-4 py-1 rounded-full shadow-md">
+                    {step.step}
+                  </div>
 
-          <div className="step-content relative z-10 transition-all duration-500">
-            <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-            <div className="h-0.5 w-0 bg-gradient-to-r from-primary to-purple-500 mx-auto mb-3 transition-all duration-700 group-hover:w-16"></div>
-            <p className="text-gray-400 transition-all duration-500 group-hover:text-gray-300">{step.description}</p>
-          </div>
+                  <div className="step-content relative z-10 transition-all duration-500">
+                    <h3 className="text-xl font-bold mb-2">{step.title}</h3>
+                    <div className="h-0.5 w-0 bg-gradient-to-r from-primary to-purple-500 mx-auto mb-3 transition-all duration-700 group-hover:w-16"></div>
+                    <p className="text-gray-400 transition-all duration-500 group-hover:text-gray-300">{step.description}</p>
+                  </div>
 
-          <div className="step-progress absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary to-purple-500 w-0 transition-all duration-700 ease-in-out group-hover:w-full"></div>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
+                  <div className="step-progress absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary to-purple-500 w-0 transition-all duration-700 ease-in-out group-hover:w-full"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
 
 
