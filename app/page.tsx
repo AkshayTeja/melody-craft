@@ -8,10 +8,15 @@ import { Marquee } from "@/components/magicui/marquee";
 import { cn } from "@/lib/utils";
 import { Music, Sparkles, Zap, Layers, Users, Check, ChevronRight, Play, Download, Wand2 } from "lucide-react"
 import BrandMarqueeSection from "@/components/brands"
+import { useSession } from "next-auth/react"
+import { UserSessionModel } from "@/lib/models"
 
 
 
 export default function LandingPage() {
+  const defaultImage = "https://api.multiavatar.com/test.png";
+	const { data: session } = useSession() as { data: UserSessionModel | null };
+
   // Refs for animation sections
   const featuresRef = useRef(null);
   const howItWorksRef = useRef(null);
@@ -45,6 +50,8 @@ export default function LandingPage() {
       observer.disconnect();
     };
   }, []);
+
+  console.log("Session:", session);
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-background via-background/95 to-background/90 text-foreground">
@@ -95,8 +102,18 @@ export default function LandingPage() {
               Testimonials
             </Link>
           </nav>
+          {(session && session.user) ? (
+            <div className="flex items-center gap-4">
+              <Link href="/dashboard" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
+                Dashboard
+              </Link>
+              <Link href="/profile" className="flex items-center gap-2 text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
+                <Image src={session.user.image || defaultImage} alt="User Avatar" width={24} height={24} className="rounded-full" />
+              </Link>
+            </div>
+          ) : (
           <div className="flex items-center gap-4">
-            <Link href="#" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
+            <Link href="/login" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
               Sign In
             </Link>
             <Button className="relative overflow-hidden group">
@@ -104,6 +121,7 @@ export default function LandingPage() {
               <span className="relative">Get Started</span>
             </Button>
           </div>
+          )}
         </div>
       </header>
       <main className="flex-1">
