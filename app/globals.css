@@ -56,16 +56,151 @@
   -webkit-backdrop-filter: blur(24px);
 }
 
-@keyframes slideLeft {
+/* Card Flip Animation */
+@keyframes slideUp {
   0% {
-    transform: translateX(0%);
+    opacity: 0;
+    transform: translateY(30px);
   }
   100% {
-    transform: translateX(-50%);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.animate-slide-left {
-  animation: slideLeft 25s linear infinite;
+/* 3D Transform Utilities */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.group:hover .group-hover\:rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+/* Add these to your globals.css file */
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Step card animations */
+.step-card {
+  overflow: hidden;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.step-card:hover {
+  transform: translateY(-10px);
+}
+
+.step-card:hover .step-number {
+  box-shadow: 0 10px 25px -5px rgba(var(--primary), 0.5);
+  transform: translateY(-5px) scale(1.1);
+}
+
+/* Shine effect animation */
+.step-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: left 0.75s;
+}
+
+.step-card:hover::before {
+  left: 150%;
+  transition: left 0.75s;
+}
+
+/* Add these to your globals.css file */
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Pricing card animations */
+.pricing-card {
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pricing-card:hover {
+  transform: translateY(-8px);
+}
+
+/* Feature item hover animation */
+.pricing-card:hover .feature-item {
+  opacity: 1;
+}
+
+/* Button shine effect */
+.pricing-button::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(45deg);
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.pricing-button:hover::after {
+  animation: buttonShine 1s forwards;
+}
+
+@keyframes buttonShine {
+  0% {
+    opacity: 0;
+    transform: scale(0.5) rotate(45deg) translateY(0);
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1) rotate(45deg) translateY(-100%);
+  }
 }
 

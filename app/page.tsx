@@ -234,120 +234,146 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {[
-                {
-                  icon: <Sparkles className="h-10 w-10 text-primary" />,
-                  title: "AI Composition",
-                  description:
-                    "Generate original melodies, harmonies, and complete tracks based on your input and preferences.",
-                },
-                {
-                  icon: <Zap className="h-10 w-10 text-primary" />,
-                  title: "Real-time Generation",
-                  description:
-                    "Create music in seconds with our lightning-fast AI models trained on millions of songs.",
-                },
-                {
-                  icon: <Layers className="h-10 w-10 text-primary" />,
-                  title: "Multi-track Support",
-                  description:
-                    "Generate individual instrument tracks and layer them to create rich, complex compositions.",
-                },
-                {
-                  icon: <Wand2 className="h-10 w-10 text-primary" />,
-                  title: "Style Transfer",
-                  description: "Transform your compositions into different genres and styles with a single click.",
-                },
-                {
-                  icon: <Users className="h-10 w-10 text-primary" />,
-                  title: "Collaborative Workspace",
-                  description: "Invite team members to collaborate on projects in real-time with shared workspaces.",
-                },
-                {
-                  icon: <Download className="h-10 w-10 text-primary" />,
-                  title: "Export Options",
-                  description: "Export your creations in multiple formats including WAV, MP3, MIDI, and more.",
-                },
-              ].map((feature, i) => (
-                <div
-                  key={i}
-                  className="group relative flex flex-col items-center gap-2 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 text-center shadow-xl transition-all duration-500 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl translate-y-10 opacity-0"
-                  style={{ 
-                    transitionDelay: `${i * 100}ms`, 
-                    animation: `slideUp 0.5s ease-out forwards ${i * 100 + 300}ms` 
-                  }}
-                >
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
-                  <div className="relative mb-4 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md p-3 border border-white/10">
-                    {feature.icon}
+            {[
+              {
+                icon: <Sparkles className="h-10 w-10 text-primary" />,
+                title: "AI Composition",
+                description:
+                  "Generate original melodies, harmonies, and complete tracks based on your input and preferences.",
+              },
+              {
+                icon: <Zap className="h-10 w-10 text-primary" />,
+                title: "Real-time Generation",
+                description:
+                  "Create music in seconds with our lightning-fast AI models trained on millions of songs.",
+              },
+              {
+                icon: <Layers className="h-10 w-10 text-primary" />,
+                title: "Multi-track Support",
+                description:
+                  "Generate individual instrument tracks and layer them to create rich, complex compositions.",
+              },
+              {
+                icon: <Wand2 className="h-10 w-10 text-primary" />,
+                title: "Style Transfer",
+                description: "Transform your compositions into different genres and styles with a single click.",
+              },
+              {
+                icon: <Users className="h-10 w-10 text-primary" />,
+                title: "Collaborative Workspace",
+                description: "Invite team members to collaborate on projects in real-time with shared workspaces.",
+              },
+              {
+                icon: <Download className="h-10 w-10 text-primary" />,
+                title: "Export Options",
+                description: "Export your creations in multiple formats including WAV, MP3, MIDI, and more.",
+              },
+            ].map((feature, i) => (
+              <div
+                key={i}
+                className="group perspective-1000 opacity-0 translate-y-10"
+                style={{ 
+                  transitionDelay: `${i * 100}ms`, 
+                  animation: `slideUp 0.5s ease-out forwards ${i * 100 + 300}ms`,
+                  height: "250px"
+                }}
+              >
+                <div className="relative w-full h-full duration-700 preserve-3d group-hover:rotate-y-180 transition-all">
+                  {/* Front of card */}
+                  <div className="absolute inset-0 backface-hidden rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 flex flex-col items-center gap-2 text-center shadow-xl">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                    <div className="relative mb-4 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md p-3 border border-white/10">
+                      {feature.icon}
+                    </div>
+                    <h3 className="relative text-xl font-bold">{feature.title}</h3>
+                    <p className="relative text-gray-400">{feature.description}</p>
                   </div>
-                  <h3 className="relative text-xl font-bold">{feature.title}</h3>
-                  <p className="relative text-gray-400">{feature.description}</p>
+                  
+                  {/* Back of card */}
+                  <div className="absolute inset-0 backface-hidden rotate-y-180 rounded-xl backdrop-blur-md bg-gradient-to-br from-primary/10 to-purple-500/10 border border-white/10 p-6 flex flex-col items-center justify-center gap-3 text-center shadow-xl">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-20"></div>
+                    <div className="relative rounded-full bg-white/10 backdrop-blur-md p-4 border border-white/10">
+                      {feature.icon}
+                    </div>
+                    <h3 className="relative text-xl font-bold">{feature.title}</h3>
+                    <div className="w-12 h-1 bg-gradient-to-r from-primary to-purple-500 rounded-full my-1"></div>
+                    <p className="relative text-gray-300 text-sm">{feature.description}</p>
+                  </div>
                 </div>
-              ))}
+              </div>
+            ))}
             </div>
           </div>
         </section>
 
         {/* How It Works Section with animation */}
         <section 
-          id="how-it-works" 
-          ref={howItWorksRef}
-          className="bg-white/5 backdrop-blur-md py-20 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000"
+  id="how-it-works" 
+  ref={howItWorksRef}
+  className="bg-white/5 backdrop-blur-md py-20 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000"
+>
+  <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20 rounded-full"></div>
+  <div className="container px-4 md:px-6 relative z-10">
+    <div className="flex flex-col items-center justify-center gap-4 text-center">
+      <div className="inline-block rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md px-4 py-1 text-sm text-primary border border-primary/20">
+        How It Works
+      </div>
+      <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-gray-300">
+        Create Music in Three Simple Steps
+      </h2>
+      <p className="max-w-[700px] text-gray-400 md:text-xl">
+        Our intuitive platform makes music creation accessible to everyone, regardless of experience level.
+      </p>
+    </div>
+    <div className="mt-16 grid gap-8 md:grid-cols-3">
+      {[
+        {
+          step: "01",
+          title: "Describe Your Vision",
+          description:
+            "Tell our AI what kind of music you want to create using text prompts or by uploading reference tracks.",
+        },
+        {
+          step: "02",
+          title: "Generate & Customize",
+          description:
+            "Our AI generates multiple options based on your input. Customize and refine until it's perfect.",
+        },
+        {
+          step: "03",
+          title: "Export & Share",
+          description:
+            "Download your creation in your preferred format or share it directly to streaming platforms.",
+        },
+      ].map((step, i) => (
+        <div
+          key={i}
+          className="step-card group relative flex flex-col items-center gap-4 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 pt-10 text-center shadow-xl transition-all duration-500 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl opacity-0"
+          style={{ 
+            transitionDelay: `${i * 200}ms`, 
+            animation: `fadeIn 0.8s ease-out forwards ${i * 200 + 400}ms` 
+          }}
         >
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20 rounded-full"></div>
-          <div className="container px-4 md:px-6 relative z-10">
-            <div className="flex flex-col items-center justify-center gap-4 text-center">
-              <div className="inline-block rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 backdrop-blur-md px-4 py-1 text-sm text-primary border border-primary/20">
-                How It Works
-              </div>
-              <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-gray-300">
-                Create Music in Three Simple Steps
-              </h2>
-              <p className="max-w-[700px] text-gray-400 md:text-xl">
-                Our intuitive platform makes music creation accessible to everyone, regardless of experience level.
-              </p>
-            </div>
-            <div className="mt-16 grid gap-8 md:grid-cols-3">
-              {[
-                {
-                  step: "01",
-                  title: "Describe Your Vision",
-                  description:
-                    "Tell our AI what kind of music you want to create using text prompts or by uploading reference tracks.",
-                },
-                {
-                  step: "02",
-                  title: "Generate & Customize",
-                  description:
-                    "Our AI generates multiple options based on your input. Customize and refine until it's perfect.",
-                },
-                {
-                  step: "03",
-                  title: "Export & Share",
-                  description:
-                    "Download your creation in your preferred format or share it directly to streaming platforms.",
-                },
-              ].map((step, i) => (
-                <div
-                  key={i}
-                  className="group relative flex flex-col items-center gap-2 rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-6 text-center shadow-xl transition-all duration-500 hover:bg-white/10 hover:shadow-primary/10 hover:shadow-2xl opacity-0"
-                  style={{ 
-                    transitionDelay: `${i * 200}ms`, 
-                    animation: `fadeIn 0.8s ease-out forwards ${i * 200 + 400}ms` 
-                  }}
-                >
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
-                  <div className="absolute -top-6 rounded-full bg-gradient-to-r from-primary to-purple-500 px-4 py-2 text-xl font-bold text-white shadow-lg shadow-primary/20">
-                    {step.step}
-                  </div>
-                  <h3 className="relative mt-6 text-xl font-bold">{step.title}</h3>
-                  <p className="relative text-gray-400">{step.description}</p>
-                </div>
-              ))}
-            </div>
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+          
+          <div className="z-10 text-xl font-bold text-white bg-gradient-to-r from-primary to-purple-500 px-4 py-1 rounded-full shadow-md">
+            {step.step}
           </div>
-        </section>
+
+          <div className="step-content relative z-10 transition-all duration-500">
+            <h3 className="text-xl font-bold mb-2">{step.title}</h3>
+            <div className="h-0.5 w-0 bg-gradient-to-r from-primary to-purple-500 mx-auto mb-3 transition-all duration-700 group-hover:w-16"></div>
+            <p className="text-gray-400 transition-all duration-500 group-hover:text-gray-300">{step.description}</p>
+          </div>
+
+          <div className="step-progress absolute bottom-0 left-0 h-1 bg-gradient-to-r from-primary to-purple-500 w-0 transition-all duration-700 ease-in-out group-hover:w-full"></div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+
 
         {/* Pricing Section with animation */}
         <section 
@@ -372,7 +398,7 @@ export default function LandingPage() {
               {[
                 {
                   name: "Starter",
-                  price: "$9",
+                  price: "FREE",
                   description: "Perfect for beginners and casual creators.",
                   features: ["10 AI generations per month", "Basic editing tools", "MP3 exports", "Community support"],
                 },
@@ -404,11 +430,11 @@ export default function LandingPage() {
               ].map((plan, i) => (
                 <div
                   key={i}
-                  className={`group relative flex flex-col rounded-xl backdrop-blur-md ${
+                  className={`pricing-card group relative flex flex-col rounded-xl backdrop-blur-md ${
                     plan.popular
                       ? "bg-gradient-to-b from-white/10 to-white/5 border border-primary/50"
                       : "bg-white/5 border border-white/10"
-                  } p-6 shadow-xl transition-all duration-500 hover:shadow-primary/10 hover:shadow-2xl translate-x-10 opacity-0`}
+                  } p-6 shadow-xl transition-all duration-500 hover:shadow-primary/10 hover:shadow-2xl opacity-0`}
                   style={{ 
                     transitionDelay: `${i * 150}ms`, 
                     animation: `slideIn 0.6s ease-out forwards ${i * 150 + 300}ms` 
@@ -420,37 +446,38 @@ export default function LandingPage() {
                     } transition-opacity duration-300`}
                   ></div>
                   {plan.popular && (
-                    <div className="relative mb-4 rounded-full bg-gradient-to-r from-primary to-purple-500 px-3 py-1 text-xs text-white w-fit">
+                    <div className="relative mb-4 rounded-full bg-gradient-to-r from-primary to-purple-500 px-3 py-1 text-xs text-white w-fit animate-pulse">
                       Most Popular
                     </div>
                   )}
-                  <h3 className="relative text-2xl font-bold">{plan.name}</h3>
-                  <div className="relative mt-4 flex items-baseline gap-1">
+                  <h3 className="pricing-title relative text-2xl font-bold transition-all duration-300 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-purple-500">{plan.name}</h3>
+                  <div className="pricing-price relative mt-4 flex items-baseline gap-1 transform transition-all duration-500 group-hover:scale-110 group-hover:translate-x-2 origin-left">
                     <span className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">
                       {plan.price}
                     </span>
                     <span className="text-gray-400">/month</span>
                   </div>
-                  <p className="relative mt-2 text-sm text-gray-400">{plan.description}</p>
+                  <p className="relative mt-2 text-sm text-gray-400 transition-colors duration-300 group-hover:text-gray-300">{plan.description}</p>
                   <ul className="relative mt-6 space-y-3">
                     {plan.features.map((feature, j) => (
-                      <li key={j} className="flex items-center gap-2">
-                        <div className="rounded-full bg-primary/20 p-1">
-                          <Check className="h-3 w-3 text-primary" />
+                      <li key={j} className="feature-item flex items-center gap-2 opacity-80 transition-all duration-300" style={{ transitionDelay: `${j * 50}ms` }}>
+                        <div className="rounded-full bg-primary/20 p-1 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/40">
+                          <Check className="h-3 w-3 text-primary transition-transform duration-300 group-hover:scale-110" />
                         </div>
-                        <span className="text-sm text-gray-300">{feature}</span>
+                        <span className="text-sm text-gray-300 transition-all duration-300 group-hover:translate-x-1">{feature}</span>
                       </li>
                     ))}
                   </ul>
                   <Button
-                    className={`relative mt-8 overflow-hidden group ${
+                    className={`pricing-button relative mt-8 overflow-hidden group transition-all duration-500 transform group-hover:translate-y-1 ${
                       plan.popular
                         ? "bg-gradient-to-r from-primary to-purple-500 hover:from-primary/90 hover:to-purple-500/90"
                         : "backdrop-blur-md bg-white/5 border-white/10 hover:bg-white/10"
                     }`}
                     variant={plan.popular ? "default" : "outline"}
                   >
-                    <span className="relative">Get Started</span>
+                    <span className="relative z-10">Get Started</span>
+                    <span className="absolute inset-0 bg-white/10 transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100"></span>
                   </Button>
                 </div>
               ))}
