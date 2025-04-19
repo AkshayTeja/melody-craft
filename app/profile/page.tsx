@@ -29,6 +29,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { signOut, useSession } from "next-auth/react"
+import { UserSessionModel } from "@/lib/models"
+import { redirect } from "next/navigation"
 
 // Mock data for recently played tracks
 const recentTracks = [
@@ -83,17 +86,19 @@ const recentTracks = [
 ]
 
 // Mock user data
-const userData = {
-  name: "Alex Johnson",
-  username: "alexj",
-  avatar: "/placeholder.svg?height=100&width=100",
-  memberSince: "January 2023",
-  tracksCreated: 42,
-  followers: 128,
-  following: 75,
-}
+// const userData = {
+//   name: "Alex Johnson",
+//   username: "alexj",
+//   avatar: "/placeholder.svg?height=100&width=100",
+//   memberSince: "January 2023",
+//   tracksCreated: 42,
+//   followers: 128,
+//   following: 75,
+// }
 
 export default function UserProfile() {
+  const defaultImage = "https://api.multiavatar.com/test.png";
+  const { data: session } = useSession() as { data: UserSessionModel | null };
   // Refs for animation sections
   const profileRef = useRef(null)
   const recentTracksRef = useRef(null)
@@ -157,16 +162,16 @@ export default function UserProfile() {
             </span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="#" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
+            <Link href="/dashboard" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
               Dashboard
             </Link>
             <Link href="/create" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
               Create
             </Link>
-            <Link href="#" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
+            <Link href="/play" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
               Play
             </Link>
-            <Link href="#" className="text-sm font-medium text-primary transition-colors">
+            <Link href="/profile" className="text-sm font-medium text-primary transition-colors">
               Profile
             </Link>
           </nav>
@@ -181,8 +186,8 @@ export default function UserProfile() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8 border border-white/10">
-                    <AvatarImage src={userData.avatar || "/placeholder.svg"} alt={userData.name} />
-                    <AvatarFallback className="bg-primary/20 text-primary">{userData.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={session?.user.image || defaultImage} alt={session?.user.name || "User"} />
+                    <AvatarFallback className="bg-primary/20 text-primary">{session?.user.name.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -193,21 +198,20 @@ export default function UserProfile() {
               >
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userData.name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">@{userData.username}</p>
+                    <p className="text-sm font-medium leading-none">{session?.user.name || "User"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">@{session?.user.email || "user@example.com"}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => redirect("/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => redirect("/settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => signOut()}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
@@ -235,31 +239,31 @@ export default function UserProfile() {
                 <div className="relative">
                   <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary to-purple-500 opacity-70 blur-sm"></div>
                   <Avatar className="h-24 w-24 border-2 border-white/10">
-                    <AvatarImage src={userData.avatar || "/placeholder.svg"} alt={userData.name} />
+                    <AvatarImage src={session?.user.image || defaultImage} alt={session?.user.name || "User"} />
                     <AvatarFallback className="bg-primary/20 text-primary text-2xl">
-                      {userData.name.charAt(0)}
+                      {session?.user.name.charAt(0) || "U"}
                     </AvatarFallback>
                   </Avatar>
                 </div>
 
                 <div className="text-center">
                   <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-gray-300">
-                    {userData.name}
+                    {session?.user.name || "User"}
                   </h2>
-                  <p className="text-gray-400">@{userData.username}</p>
+                  <p className="text-gray-400">@{session?.user.email || "user@example.com"}</p>
                 </div>
 
                 <div className="w-full grid grid-cols-3 gap-4 text-center">
                   <div className="flex flex-col">
-                    <span className="text-xl font-bold text-white">{userData.tracksCreated}</span>
+                    <span className="text-xl font-bold text-white">42</span>
                     <span className="text-xs text-gray-400">Tracks</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xl font-bold text-white">{userData.followers}</span>
+                    <span className="text-xl font-bold text-white">120</span>
                     <span className="text-xs text-gray-400">Followers</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xl font-bold text-white">{userData.following}</span>
+                    <span className="text-xl font-bold text-white">8</span>
                     <span className="text-xs text-gray-400">Following</span>
                   </div>
                 </div>
@@ -267,7 +271,7 @@ export default function UserProfile() {
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-2"></div>
 
                 <div className="text-sm text-gray-400">
-                  <p>Member since {userData.memberSince}</p>
+                  <p>Member since {session?.user.created_at?.toLocaleDateString("en-US") || "N/A"}</p>
                 </div>
 
                 <Button className="w-full relative overflow-hidden group">
@@ -289,7 +293,7 @@ export default function UserProfile() {
                     {[
                       {
                         label: "Tracks Created",
-                        value: userData.tracksCreated,
+                        value: 42,
                         icon: <Music className="h-5 w-5 text-primary" />,
                       },
                       { label: "Hours Spent", value: "128", icon: <Clock className="h-5 w-5 text-primary" /> },

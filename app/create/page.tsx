@@ -28,6 +28,9 @@ import { Progress } from "@/components/ui/progress"
 import { Sparkles as SparklesEffect } from "lucide-react"
 import Link from "next/link"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { redirect } from "next/navigation"
+import { signOut, useSession } from "next-auth/react"
+import { UserSessionModel } from "@/lib/models"
 
 // Mock user data
 const userData = {
@@ -73,6 +76,8 @@ const mockGeneratedTracks = [
 ]
 
 export default function MusicCreator() {
+  const defaultImage = "https://api.multiavatar.com/test.png";
+    const { data: session } = useSession() as { data: UserSessionModel | null };
   // State for conversation
   const [conversation, setConversation] = useState(initialConversation)
   const [inputMessage, setInputMessage] = useState("")
@@ -205,13 +210,13 @@ useEffect(() => {
             </span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="#" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
+            <Link href="/dashboard" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
               Dashboard
             </Link>
-            <Link href="#" className="text-sm font-medium text-primary hover:text-primary transition-colors">
+            <Link href="/create" className="text-sm font-medium text-primary hover:text-primary transition-colors">
               Create
             </Link>
-            <Link href="#" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
+            <Link href="/lay" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
               Play
             </Link>
             <Link href="/profile" className="text-sm font-medium text-foreground/70 transition-colors">
@@ -229,8 +234,8 @@ useEffect(() => {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8 border border-white/10">
-                    <AvatarImage src={userData.avatar || "/placeholder.svg"} alt={userData.name} />
-                    <AvatarFallback className="bg-primary/20 text-primary">{userData.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={session?.user.image || defaultImage} alt={session?.user.name || "User"} />
+                    <AvatarFallback className="bg-primary/20 text-primary">{session?.user.name.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
@@ -241,21 +246,20 @@ useEffect(() => {
               >
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">{userData.name}</p>
-                    <p className="text-xs leading-none text-muted-foreground">@{userData.username}</p>
+                    <p className="text-sm font-medium leading-none">{session?.user.name || "User"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">@{session?.user.email || "user@example.com"}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => redirect("/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => redirect("/settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onClick={() => signOut()}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>
