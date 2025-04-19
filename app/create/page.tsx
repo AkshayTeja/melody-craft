@@ -216,7 +216,7 @@ useEffect(() => {
             <Link href="/create" className="text-sm font-medium text-primary hover:text-primary transition-colors">
               Create
             </Link>
-            <Link href="/lay" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
+            <Link href="/play" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
               Play
             </Link>
             <Link href="/profile" className="text-sm font-medium text-foreground/70 transition-colors">
