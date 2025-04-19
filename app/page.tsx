@@ -4,13 +4,20 @@ import Image from "next/image"
 import Head from "next/head"
 import { useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
-import { Marquee } from "@/components/magicui/marquee";
-import { cn } from "@/lib/utils";
-import { Music, Sparkles, Zap, Layers, Users, Check, ChevronRight, Play, Download, Wand2 } from "lucide-react"
+import { Music, Sparkles, Zap, Layers, Users, Check, ChevronRight, Play, Download, Wand2, User, Settings, LogOut } from "lucide-react"
 import BrandMarqueeSection from "@/components/brands"
-import { useSession } from "next-auth/react"
 import { UserSessionModel } from "@/lib/models"
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { signOut, useSession } from "next-auth/react"
+import { redirect } from "next/navigation"
 
 
 export default function LandingPage() {
@@ -50,8 +57,6 @@ export default function LandingPage() {
       observer.disconnect();
     };
   }, []);
-
-  console.log("Session:", session);
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-background via-background/95 to-background/90 text-foreground">
@@ -104,12 +109,41 @@ export default function LandingPage() {
           </nav>
           {(session && session.user) ? (
             <div className="flex items-center gap-4">
-              <Link href="/dashboard" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
-                Dashboard
-              </Link>
-              <Link href="/profile" className="flex items-center gap-2 text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
-                <Image src={session.user.image || defaultImage} alt="User Avatar" width={24} height={24} className="rounded-full" />
-              </Link>
+              <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8 border border-white/10">
+                    <AvatarImage src={session?.user.image || defaultImage} alt={session?.user.name || "User"} />
+                    <AvatarFallback className="bg-primary/20 text-primary">{session?.user.name.charAt(0) || "U"}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-56 backdrop-blur-md bg-white/5 border border-white/10"
+                align="end"
+                forceMount
+              >
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{session?.user.name || "User"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">@{session?.user.email || "user@example.com"}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="cursor-pointer" onClick={() => redirect("/profile")}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => redirect("/settings")}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => signOut()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             </div>
           ) : (
           <div className="flex items-center gap-4">
@@ -174,6 +208,7 @@ export default function LandingPage() {
                 <div className="relative h-[400px] w-full max-w-[700px] rounded-xl backdrop-blur-md bg-white/5 border border-white/10 p-1 shadow-2xl overflow-hidden">
                   <div className="absolute inset-0 flex items-center justify-center">
                     <video
+                      suppressHydrationWarning
                       src="/video.mp4"
                       autoPlay
                       loop
