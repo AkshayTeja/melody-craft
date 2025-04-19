@@ -308,10 +308,7 @@ export default function MusicCreator() {
             >
               Create
             </Link>
-            <Link
-              href="/lay"
-              className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors"
-            >
+            <Link href="/play" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
               Play
             </Link>
             <Link
