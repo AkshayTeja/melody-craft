@@ -1,11 +1,13 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import {
-  ThemeProvider as NextThemesProvider,
-  type ThemeProviderProps,
-} from 'next-themes'
+import { SessionProvider } from "next-auth/react";
+import { ThemeProvider } from "next-themes";
+import React from "react";
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+export default function NextAuthProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
+	return (
+		<SessionProvider>
+				<ThemeProvider attribute={"class"}>{children}</ThemeProvider>
+		</SessionProvider>
+	);
 }
