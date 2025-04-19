@@ -1,26 +1,6 @@
 "use client"
-import Link from "next/link"
-import Image from "next/image"
-import { SetStateAction, useEffect, useRef, useState } from "react"
-import { Button } from "@/components/ui/button"
-import {
-  Music,
-  User,
-  Clock,
-  Heart,
-  MoreHorizontal,
-  Play,
-  Pause,
-  SkipForward,
-  SkipBack,
-  Volume2,
-  LogOut,
-  Settings,
-  Bell,
-  Sparkles,
-} from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,72 +9,41 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { signOut, useSession } from "next-auth/react"
+import { Progress } from "@/components/ui/progress"
 import { UserSessionModel } from "@/lib/models"
+import {
+  Bell,
+  Clock,
+  Heart,
+  LogOut,
+  MoreHorizontal,
+  Music,
+  Pause,
+  Play,
+  Settings,
+  SkipBack,
+  SkipForward,
+  Sparkles,
+  User,
+  Volume2,
+} from "lucide-react"
+import { signOut, useSession } from "next-auth/react"
+import Image from "next/image"
+import Link from "next/link"
 import { redirect } from "next/navigation"
+import { SetStateAction, useEffect, useRef, useState } from "react"
+import { HashLoader } from "react-spinners"
+import CustomMidiPlayer from "./components/player"
 
-// Mock data for recently played tracks
-const recentTracks = [
-  {
-    id: 1,
-    title: "Midnight Serenade",
-    artist: "Lunar Waves",
-    duration: "3:45",
-    cover: "/placeholder.svg?height=60&width=60",
-    date: "Today",
-  },
-  {
-    id: 2,
-    title: "Electric Dreams",
-    artist: "Neon Pulse",
-    duration: "4:12",
-    cover: "/placeholder.svg?height=60&width=60",
-    date: "Today",
-  },
-  {
-    id: 3,
-    title: "Ocean Breeze",
-    artist: "Coastal Echoes",
-    duration: "3:28",
-    cover: "/placeholder.svg?height=60&width=60",
-    date: "Yesterday",
-  },
-  {
-    id: 4,
-    title: "Urban Jungle",
-    artist: "City Lights",
-    duration: "5:02",
-    cover: "/placeholder.svg?height=60&width=60",
-    date: "Yesterday",
-  },
-  {
-    id: 5,
-    title: "Starlight Symphony",
-    artist: "Cosmic Harmony",
-    duration: "4:37",
-    cover: "/placeholder.svg?height=60&width=60",
-    date: "2 days ago",
-  },
-  {
-    id: 6,
-    title: "Digital Sunset",
-    artist: "Virtual Horizon",
-    duration: "3:55",
-    cover: "/placeholder.svg?height=60&width=60",
-    date: "3 days ago",
-  },
-]
-
-// Mock user data
-// const userData = {
-//   name: "Alex Johnson",
-//   username: "alexj",
-//   avatar: "/placeholder.svg?height=100&width=100",
-//   memberSince: "January 2023",
-//   tracksCreated: 42,
-//   followers: 128,
-//   following: 75,
-// }
+interface TrackDetails {
+  user_id: string;
+  file_name: string;
+  song_name: string;
+  genre: string;
+  total_time: number;
+  qpm: number;
+  steps_per_chord: number;
+}
 
 export default function UserProfile() {
   const defaultImage = "https://api.multiavatar.com/test.png";
@@ -103,11 +52,32 @@ export default function UserProfile() {
   const profileRef = useRef(null)
   const recentTracksRef = useRef(null)
   const playerRef = useRef(null)
+  const [apiEndpoint, setApiEndpoint] = useState("")
 
   // State for player
   const [isPlaying, setIsPlaying] = useState(false)
-  const [currentTrack, setCurrentTrack] = useState(recentTracks[0])
-  const [progress, setProgress] = useState(45)
+  const [currentTrack, setCurrentTrack] = useState<TrackDetails | null>(null)
+  const [trackDetails, setTrackDetails] = useState<TrackDetails[]>([])
+
+  useEffect(() => {
+    if (!session) return;
+    // Fetch track details from the server (mocked here)
+    // ${session.user.name.replace(' ', '-').toLowerCase()}
+    const fetchTrackDetails = async () => {
+      try {
+        const response = await fetch(`http://192.168.7.174:8000/getTracks/${session.user.name.replace(' ', '').toLowerCase()}`) // Replace with your actual API endpoint
+        const data = await response.json()
+        if (data.error) {
+          console.error("Error fetching track details:", data.error)
+          return
+        }
+        setTrackDetails(data)
+      } catch (error) {
+        console.error("Error fetching track details:", error)
+      }
+    }
+    fetchTrackDetails()
+  }, [session]);
 
   useEffect(() => {
     // Simple animation on scroll
@@ -141,9 +111,25 @@ export default function UserProfile() {
   }
 
   // Play a specific track
-  const playTrack = (track: SetStateAction<{ id: number; title: string; artist: string; duration: string; cover: string; date: string }>) => {
+  const playTrack = (track: TrackDetails) => {
+    setApiEndpoint(`http://192.168.7.174:8000/getTrack/${session?.user.name.replace(' ', '').toLowerCase()}/${track.genre}/${track.file_name}`)
+
     setCurrentTrack(track)
     setIsPlaying(true)
+  }
+
+  const formatTime = (track: TrackDetails) => {
+    const minutes = Math.floor(track.total_time / 60)
+    const seconds = track.total_time % 60
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
+  }
+
+  if (!session) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <HashLoader className="h-32 w-32" color={"#5f05e6"} />
+      </div>
+    );
   }
 
   return (
@@ -162,9 +148,6 @@ export default function UserProfile() {
             </span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/dashboard" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
-              Dashboard
-            </Link>
             <Link href="/create" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
               Create
             </Link>
@@ -199,7 +182,7 @@ export default function UserProfile() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{session?.user.name || "User"}</p>
-                    <p className="text-xs leading-none text-muted-foreground">@{session?.user.email || "user@example.com"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{session?.user.email || "user@example.com"}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -237,7 +220,6 @@ export default function UserProfile() {
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-purple-500/50 rounded-xl blur opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
 
                 <div className="relative">
-                  <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary to-purple-500 opacity-70 blur-sm"></div>
                   <Avatar className="h-24 w-24 border-2 border-white/10">
                     <AvatarImage src={session?.user.image || defaultImage} alt={session?.user.name || "User"} />
                     <AvatarFallback className="bg-primary/20 text-primary text-2xl">
@@ -250,7 +232,7 @@ export default function UserProfile() {
                   <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-gray-100 to-gray-300">
                     {session?.user.name || "User"}
                   </h2>
-                  <p className="text-gray-400">@{session?.user.email || "user@example.com"}</p>
+                  <p className="text-gray-400">{session?.user.email || "user@example.com"}</p>
                 </div>
 
                 <div className="w-full grid grid-cols-3 gap-4 text-center">
@@ -271,7 +253,7 @@ export default function UserProfile() {
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-2"></div>
 
                 <div className="text-sm text-gray-400">
-                  <p>Member since {session?.user.created_at?.toLocaleDateString("en-US") || "N/A"}</p>
+                  <p>Member since {session?.user.created_at?.toLocaleDateString("en-US") || new Date().toLocaleDateString("en-US")}</p>
                 </div>
 
                 <Button className="w-full relative overflow-hidden group">
@@ -369,7 +351,7 @@ export default function UserProfile() {
         <section
           id="recent-tracks"
           ref={recentTracksRef}
-          className="py-16 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000"
+          className="py-16 relative overflow-hidden opacity-0 translate-y-10 transition-all duration-1000 mb-32"
         >
           <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-tr from-primary/20 via-purple-500/10 to-transparent blur-3xl opacity-20 rounded-full"></div>
 
@@ -398,10 +380,10 @@ export default function UserProfile() {
                 </div>
 
                 <div className="space-y-2">
-                  {recentTracks.map((track, i) => (
+                  {(trackDetails ?? []).map((track, i) => (
                     <div
-                      key={track.id}
-                      className="track-item group grid grid-cols-[auto_1fr_auto_auto] gap-4 items-center rounded-lg p-4 transition-all duration-300 hover:bg-white/10 opacity-0"
+                      key={i}
+                      className="track-item group grid grid-cols-[auto_1fr_auto_auto] gap-4 items-center justify-items-stretch rounded-lg p-4 transition-all duration-300 hover:bg-white/10 opacity-0"
                       style={{
                         transitionDelay: `${i * 100}ms`,
                         animation: `slideUp 0.5s ease-out forwards ${i * 100 + 300}ms`,
@@ -409,7 +391,7 @@ export default function UserProfile() {
                       onClick={() => playTrack(track)}
                     >
                       <div className="flex items-center justify-center w-8 h-8 text-gray-400 group-hover:text-primary transition-colors">
-                        {currentTrack.id === track.id && isPlaying ? (
+                        {currentTrack && currentTrack.file_name === track.file_name && isPlaying ? (
                           <div className="flex space-x-0.5">
                             {[1, 2, 3].map((bar) => (
                               <div
@@ -430,19 +412,19 @@ export default function UserProfile() {
                       <div className="flex items-center gap-3">
                         <div className="relative w-10 h-10 rounded-md overflow-hidden">
                           <Image
-                            src={track.cover || "/placeholder.svg"}
-                            alt={track.title}
+                            src={"/placeholder.svg"}
+                            alt={track.song_name}
                             fill
                             className="object-cover"
                           />
                         </div>
                         <div>
-                          <p className="font-medium text-white">{track.title}</p>
-                          <p className="text-sm text-gray-400">{track.artist}</p>
+                          <p className="font-medium text-white">{track.song_name}</p>
+                          <p className="text-sm text-gray-400">{track.genre}</p>
                         </div>
                       </div>
 
-                      <div className="text-gray-400">{track.duration}</div>
+                      <div className="text-gray-400 justify-self-end">{formatTime(track)}</div>
 
                       <div className="flex items-center gap-2">
                         <Button
@@ -491,63 +473,7 @@ export default function UserProfile() {
         </section>
 
         {/* Music Player Section */}
-        <section
-          ref={playerRef}
-          className="fixed bottom-0 left-0 right-0 backdrop-blur-xl bg-background/30 border-t border-white/10 supports-[backdrop-filter]:bg-background/10 opacity-0 translate-y-10 transition-all duration-1000 z-50"
-        >
-          <div className="container px-4 py-3">
-            <div className="grid grid-cols-[1fr_2fr_1fr] gap-4 items-center">
-              {/* Current Track Info */}
-              <div className="flex items-center gap-3">
-                <div className="relative w-12 h-12 rounded-md overflow-hidden">
-                  <Image
-                    src={currentTrack.cover || "/placeholder.svg"}
-                    alt={currentTrack.title}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-                <div>
-                  <p className="font-medium text-white text-sm">{currentTrack.title}</p>
-                  <p className="text-xs text-gray-400">{currentTrack.artist}</p>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Heart className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* Player Controls */}
-              <div className="flex flex-col items-center gap-1">
-                <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <SkipBack className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 text-white"
-                    onClick={togglePlay}
-                  >
-                    {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <SkipForward className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <div className="w-full flex items-center gap-2">
-                  <span className="text-xs text-gray-400">1:42</span>
-                  <Progress value={progress} className="h-1" />
-                  <span className="text-xs text-gray-400">{currentTrack.duration}</span>
-                </div>
-              </div>
-
-              {/* Volume Control */}
-              <div className="flex items-center justify-end gap-2">
-                <Volume2 className="h-4 w-4 text-gray-400" />
-                <Progress value={75} className="h-1 w-24" />
-              </div>
-            </div>
-          </div>
-        </section>
+        <CustomMidiPlayer apiEndpoint={apiEndpoint} />
       </main>
 
       {/* Global styles for animations */}

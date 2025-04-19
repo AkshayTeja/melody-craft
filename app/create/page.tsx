@@ -1,43 +1,37 @@
 "use client"
-import { useState, useRef, useEffect } from "react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Slider } from "@/components/ui/slider"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Textarea } from "@/components/ui/textarea"
+import { UserSessionModel } from "@/lib/models"
 import {
-  Music,
-  Send,
-  Play,
-  Pause,
-  Download,
-  Sparkles,
-  Wand2,
+  Bell,
   Disc3,
+  Download,
+  LogOut,
+  Music,
   Music2,
+  Pause,
+  Play,
   RefreshCw,
   Save,
-  Share2,
-  LogOut,
-  Bell,
+  Send,
   Settings,
+  Share2,
+  Sparkles,
+  Sparkles as SparklesEffect,
   User,
+  Wand2,
 } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
-import { Sparkles as SparklesEffect } from "lucide-react"
-import Link from "next/link"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { redirect } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
-import { UserSessionModel } from "@/lib/models"
-
-// Mock user data
-const userData = {
-  name: "Alex Johnson",
-  username: "alexj",
-  avatar: "/placeholder.svg?height=40&width=40",
-}
+import Link from "next/link"
+import { redirect } from "next/navigation"
+import { useEffect, useRef, useState } from "react"
+import { HashLoader } from "react-spinners"
 
 // Music genres
 const genres = ["Pop", "Rock", "Hip Hop", "Electronic", "Jazz", "Classical", "R&B", "Country", "Ambient", "Lo-fi"]
@@ -77,7 +71,7 @@ const mockGeneratedTracks = [
 
 export default function MusicCreator() {
   const defaultImage = "https://api.multiavatar.com/test.png";
-    const { data: session } = useSession() as { data: UserSessionModel | null };
+  const { data: session } = useSession() as { data: UserSessionModel | null };
   // State for conversation
   const [conversation, setConversation] = useState(initialConversation)
   const [inputMessage, setInputMessage] = useState("")
@@ -98,7 +92,6 @@ export default function MusicCreator() {
   // Refs
   const chatContainerRef = useRef(null)
 
-  
 useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation]);
@@ -194,6 +187,14 @@ useEffect(() => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   }
 
+  if (!session) {
+		return (
+			<div className="flex h-screen w-full items-center justify-center">
+				<HashLoader className="h-32 w-32" color={"#5f05e6"} />
+			</div>
+		);
+	}
+
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-b from-background via-background/95 to-background/90 text-foreground">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/30 border-b border-white/10 supports-[backdrop-filter]:bg-background/10">
@@ -210,9 +211,6 @@ useEffect(() => {
             </span>
           </div>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/dashboard" className="text-sm font-medium text-foreground/70 hover:text-primary transition-colors">
-              Dashboard
-            </Link>
             <Link href="/create" className="text-sm font-medium text-primary hover:text-primary transition-colors">
               Create
             </Link>
@@ -247,7 +245,7 @@ useEffect(() => {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{session?.user.name || "User"}</p>
-                    <p className="text-xs leading-none text-muted-foreground">@{session?.user.email || "user@example.com"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{session?.user.email || "user@example.com"}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -322,8 +320,8 @@ useEffect(() => {
                             </div>
                           ) : (
                             <Avatar className="h-8 w-8">
-                              <AvatarImage src={userData.avatar || "/placeholder.svg"} alt={userData.name} />
-                              <AvatarFallback>{userData.name.charAt(0)}</AvatarFallback>
+                              <AvatarImage src={session?.user.image || defaultImage} alt={session?.user.name || "User"} />
+                              <AvatarFallback className="bg-primary/20 text-primary">{session?.user.name.charAt(0) || "U"}</AvatarFallback>
                             </Avatar>
                           )}
                         </div>

@@ -1,13 +1,7 @@
 "use client"
-import Link from "next/link"
-import Image from "next/image"
-import Head from "next/head"
-import { useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import { Music, Sparkles, Zap, Layers, Users, Check, ChevronRight, Play, Download, Wand2, User, Settings, LogOut } from "lucide-react"
 import BrandMarqueeSection from "@/components/brands"
-import { UserSessionModel } from "@/lib/models"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,8 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { UserSessionModel } from "@/lib/models"
+import { Check, ChevronRight, Download, Layers, LogOut, Music, Play, Settings, Sparkles, User, Users, Wand2, Zap } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
+import Head from "next/head"
+import Link from "next/link"
 import { redirect } from "next/navigation"
+import { useEffect, useRef } from "react"
 
 
 export default function LandingPage() {
@@ -126,7 +125,7 @@ export default function LandingPage() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">{session?.user.name || "User"}</p>
-                    <p className="text-xs leading-none text-muted-foreground">@{session?.user.email || "user@example.com"}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{session?.user.email || "user@example.com"}</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
