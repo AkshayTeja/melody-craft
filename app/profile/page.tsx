@@ -112,7 +112,7 @@ export default function UserProfile() {
 
   // Play a specific track
   const playTrack = (track: TrackDetails) => {
-    setApiEndpoint(`http://192.168.7.174:8000/getTrack/${session?.user.name.replace(' ', '').toLowerCase()}/${track.genre}/${track.file_name}`)
+    setApiEndpoint(`http://192.168.7.174:8000/getTrack/${session?.user.name.replace(' ', '').toLowerCase()}/${track.genre}/${track.file_name}.mid`)
 
     setCurrentTrack(track)
     setIsPlaying(true)
@@ -253,7 +253,7 @@ export default function UserProfile() {
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-2"></div>
 
                 <div className="text-sm text-gray-400">
-                  <p>Member since {session?.user.created_at?.toLocaleDateString("en-US") || new Date().toLocaleDateString("en-US")}</p>
+                  <p>Member since {new Date().toLocaleDateString("en-US")}</p>
                 </div>
 
                 <Button className="w-full relative overflow-hidden group">
@@ -459,7 +459,11 @@ export default function UserProfile() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-40 backdrop-blur-md bg-white/5 border border-white/10">
                             <DropdownMenuItem className="cursor-pointer">Add to playlist</DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer">Share</DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => {
+                              navigator.clipboard.writeText(`http://192.168.7.174:8000/getTrack/${session?.user.name.replace(' ', '').toLowerCase()}/${track.genre}/${track.file_name}.mid`)
+                            }}>
+                              Copy Link
+                            </DropdownMenuItem>
                             <DropdownMenuItem className="cursor-pointer">Download</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

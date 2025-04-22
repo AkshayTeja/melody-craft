@@ -19,7 +19,7 @@ interface MidiPlayerProps {
   midiData?: ArrayBuffer;
 }
 
-export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerProps) {
+export default function MidiPlayer({ apiEndpoint, midiData }: MidiPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -51,6 +51,8 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
       if (typeof window === "undefined") return;
 
       try {
+        setIsLoading(true);
+        
         // Dynamically import libraries
         const [MidiPlayerModule, SoundfontModule] = await Promise.all([
           import("midi-player-js"),
@@ -68,11 +70,40 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
         }
 
         // Initialize player
-        const player = new MidiPlayer.Player();
+        const player = new MidiPlayer.Player((event: any) => {
+          // This callback handles all player events
+          if (!mounted) return;
+          
+          switch (event.name) {
+            case 'File loaded':
+              const estimatedDuration = player.getSongTime() || 120;
+              setDuration(estimatedDuration);
+              setCurrentTime(0);
+              break;
+              
+            case 'Playing':
+              if (player.getTotalTicks() > 0) {
+                const percentage = event.tick / player.getTotalTicks();
+                setCurrentTime(percentage * duration);
+              }
+              break;
+              
+            case 'End of track':
+              setIsPlaying(false);
+              setCurrentTime(0);
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+              }
+              activeNotesRef.current.clear();
+              break;
+          }
+        });
+
         midiPlayerRef.current = player;
 
         // Load soundfont
-        const soundfont = await Soundfont.instrument(
+        soundfontRef.current = await Soundfont.instrument(
           audioContextRef.current,
           "acoustic_grand_piano",
           {
@@ -80,64 +111,10 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
             gain: isMuted ? 0 : volume / 100,
           }
         );
-        soundfontRef.current = soundfont;
-
-        // Set up event listeners only after both are ready
-        player.on("playing", (currentTick: any) => {
-          if (!mounted) return;
-          if (player.getTotalTicks() > 0) {
-            const percentage = currentTick.tick / player.getTotalTicks();
-            setCurrentTime(percentage * player.getSongTime());
-          }
-        });
-
-        player.on("endOfFile", () => {
-          if (!mounted) return;
-          setIsPlaying(false);
-          setCurrentTime(0);
-          if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-          }
-          // Clear all active notes
-          activeNotesRef.current.clear();
-        });
-
-        player.on("midiEvent", (event: any) => {
-          // Only process if we have the soundfont ready
-          if (!soundfontRef.current) return;
-
-          try {
-            // Handle note-on events
-            if (event.name === "Note on" && event.velocity > 0) {
-              const actualVolume = isMuted
-                ? 0
-                : (event.velocity / 127) * (volume / 100);
-              soundfont.play(
-                event.noteNumber,
-                audioContextRef.current!.currentTime,
-                {
-                  gain: actualVolume,
-                  duration: 3, // Default duration that will be stopped on note-off
-                }
-              );
-
-              // Track active note for visualization
-              activeNotesRef.current.add(event.noteNumber.toString());
-            }
-
-            // Handle note-off events
-            if (event.name === "Note off" || event.velocity === 0) {
-              // Remove from active notes
-              activeNotesRef.current.delete(event.noteNumber.toString());
-            }
-          } catch (err) {
-            console.error("Error handling MIDI event:", err);
-          }
-        });
 
         if (mounted) {
           setIsInitialized(true);
+          setIsLoading(false);
         }
       } catch (err) {
         console.error("Failed to initialize MIDI player:", err);
@@ -145,6 +122,7 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
           setError(
             "Failed to initialize MIDI player. Please check if your browser supports Web Audio API."
           );
+          setIsLoading(false);
         }
       }
     };
@@ -155,6 +133,9 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
       mounted = false;
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+      }
+      if (midiPlayerRef.current) {
+        midiPlayerRef.current.stop();
       }
     };
   }, []);
@@ -188,10 +169,8 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
         let midiBuffer: ArrayBuffer;
 
         if (midiData) {
-          // Use provided MIDI data
           midiBuffer = midiData;
         } else if (apiEndpoint) {
-          // Fetch from API
           const response = await fetch(apiEndpoint);
           if (!response.ok) {
             throw new Error(
@@ -203,54 +182,20 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
           throw new Error("No MIDI source provided");
         }
 
-        // Convert ArrayBuffer to base64 string
-        const uint8Array = new Uint8Array(midiBuffer);
-        let binaryString = "";
-        uint8Array.forEach((byte) => {
-          binaryString += String.fromCharCode(byte);
-        });
-        const base64String = btoa(binaryString);
-
+        // Convert ArrayBuffer to base64
+        const base64String = arrayBufferToBase64(midiBuffer);
+        
         // Load the MIDI data
         midiPlayerRef.current.loadDataUri(`data:audio/midi;base64,${base64String}`);
-
-        // Extract MIDI info from the first track
-        let midiName = "MIDI File";
-        let genre = "Classical";
-        try {
-          if (midiPlayerRef.current.tracks && midiPlayerRef.current.tracks.length > 0) {
-            const firstTrack = midiPlayerRef.current.tracks[0];
-            if (firstTrack.events && firstTrack.events.length > 0) {
-              // Try to find track name event
-              for (const event of firstTrack.events) {
-                if (event.name === "Track Name") {
-                  midiName = event.data || midiName;
-                  break;
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.warn("Could not parse MIDI track name:", err);
-        }
-
-        setMidiInfo({
-          name: midiName,
-          genre: genre,
-          tracks: midiPlayerRef.current.tracks
-            ? midiPlayerRef.current.tracks.length
-            : 0,
-        });
-
-        // Set duration and reset state
-        const estimatedDuration = midiPlayerRef.current.getSongTime() || 120; // Default to 2min if unknown
-        setDuration(estimatedDuration);
-        setCurrentTime(0);
         
+        // Extract MIDI info
+        extractMidiInfo();
+
         // Show the player UI
         setTimeout(() => {
           setPlayerVisible(true);
         }, 100);
+
       } catch (err: any) {
         console.error("Failed to load MIDI:", err);
         setError(err.message || "Failed to load MIDI file");
@@ -260,14 +205,52 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
       }
     };
 
+    const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+      const bytes = new Uint8Array(buffer);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return window.btoa(binary);
+    };
+
+    const extractMidiInfo = () => {
+      let midiName = "MIDI File";
+      let genre = "Classical";
+      const player = midiPlayerRef.current;
+      
+      try {
+        if (player.tracks && player.tracks.length > 0) {
+          const firstTrack = player.tracks[0];
+          if (firstTrack.events && firstTrack.events.length > 0) {
+            for (const event of firstTrack.events) {
+              if (event.name === "Track Name") {
+                midiName = event.data || midiName;
+                break;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("Could not parse MIDI track name:", err);
+      }
+
+      setMidiInfo({
+        name: midiName,
+        genre: genre,
+        tracks: player.tracks ? player.tracks.length : 0,
+      });
+    };
+
     if (apiEndpoint || midiData) {
       loadMidi();
     }
-  }, [apiEndpoint, midiData, isInitialized, isPlaying]);
+  }, [apiEndpoint, midiData, isInitialized]);
 
   // Play/pause control
   const togglePlayback = () => {
     if (!midiPlayerRef.current || isLoading || !isInitialized) return;
+    console.log("Toggling playback...");
 
     if (audioContextRef.current?.state === "suspended") {
       audioContextRef.current.resume();
@@ -286,17 +269,20 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
         midiPlayerRef.current.stop();
       }
 
+      console.log("Playing MIDI file...");
       midiPlayerRef.current.play();
       setIsPlaying(true);
 
       // Update time display
       intervalRef.current = setInterval(() => {
         if (midiPlayerRef.current && midiPlayerRef.current.isPlaying()) {
-          setCurrentTime((prev) => {
-            const newTime = prev + 0.1;
-            return newTime > duration ? duration : newTime;
-          });
-        } else if (!midiPlayerRef.current.isPlaying()) {
+          const ticks = midiPlayerRef.current.getCurrentTick();
+          const totalTicks = midiPlayerRef.current.getTotalTicks();
+          if (totalTicks > 0) {
+            const percentage = ticks / totalTicks;
+            setCurrentTime(percentage * duration);
+          }
+        } else if (midiPlayerRef.current && !midiPlayerRef.current.isPlaying()) {
           clearInterval(intervalRef.current!);
           intervalRef.current = null;
           setIsPlaying(false);
@@ -305,58 +291,40 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
     }
   };
 
-  // Handle seek to new position
-  const handleSeek = (value: number) => {
-    if (!midiPlayerRef.current || isLoading || !isInitialized) return;
+  // Skip back to beginning
+  const skipToBeginning = () => {
+    if (!midiPlayerRef.current || !isInitialized) return;
     
-    const seekTime = value;
-    setCurrentTime(seekTime);
+    midiPlayerRef.current.stop();
+    setCurrentTime(0);
 
-    const wasPlaying = isPlaying;
-
-    // Pause current playback
     if (isPlaying) {
-      midiPlayerRef.current.pause();
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    }
-
-    // Calculate tick position - handle edge cases
-    const totalTicks =
-      midiPlayerRef.current.totalTicks || midiPlayerRef.current.getTotalTicks();
-    if (totalTicks > 0) {
-      const tickPosition = Math.floor((seekTime / duration) * totalTicks);
-      try {
-        midiPlayerRef.current.skipToTick(tickPosition);
-      } catch (err) {
-        console.error("Error seeking:", err);
-      }
-    }
-
-    // Resume playback if it was playing before
-    if (wasPlaying) {
-      midiPlayerRef.current.play();
-      setIsPlaying(true);
-
-      // Update time display
-      intervalRef.current = setInterval(() => {
-        if (midiPlayerRef.current.isPlaying()) {
-          setCurrentTime((prev) => {
-            const newTime = prev + 0.1;
-            return newTime > duration ? duration : newTime;
-          });
-        }
-      }, 100);
+      setTimeout(() => {
+        midiPlayerRef.current.play();
+      }, 50);
     }
   };
 
-  // Format time display (mm:ss)
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  // Skip forward 10 seconds
+  const skipForward = () => {
+    if (!midiPlayerRef.current || !isInitialized) return;
+    
+    const newTime = Math.min(currentTime + 10, duration);
+    const percentage = newTime / duration;
+    const totalTicks = midiPlayerRef.current.getTotalTicks();
+    const tickPosition = Math.floor(percentage * totalTicks);
+
+    const wasPlaying = isPlaying;
+    
+    midiPlayerRef.current.stop();
+    midiPlayerRef.current.skipToTick(tickPosition);
+    setCurrentTime(newTime);
+
+    if (wasPlaying) {
+      setTimeout(() => {
+        midiPlayerRef.current.play();
+      }, 50);
+    }
   };
 
   // Toggle mute
@@ -364,56 +332,7 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
     setIsMuted(!isMuted);
   };
 
-  // Skip back to beginning
-  const skipToBeginning = () => {
-    if (midiPlayerRef.current && isInitialized) {
-      // Stop and reset to beginning
-      midiPlayerRef.current.stop();
-      setCurrentTime(0);
-
-      // If it was playing, restart playback
-      if (isPlaying) {
-        setTimeout(() => {
-          midiPlayerRef.current.play();
-        }, 50);
-      }
-    }
-  };
-
-  // Skip forward 10 seconds
-  const skipForward = () => {
-    if (midiPlayerRef.current && isInitialized) {
-      // Skip forward 10 seconds
-      const newTime = Math.min(currentTime + 10, duration);
-      setCurrentTime(newTime);
-
-      const wasPlaying = isPlaying;
-
-      // Calculate new tick position
-      const totalTicks =
-        midiPlayerRef.current.totalTicks || midiPlayerRef.current.getTotalTicks();
-      if (totalTicks > 0) {
-        const tickPosition = Math.floor((newTime / duration) * totalTicks);
-
-        try {
-          // Need to stop first for reliable seeking in some MIDI players
-          midiPlayerRef.current.pause();
-          midiPlayerRef.current.skipToTick(tickPosition);
-
-          // Resume if it was playing
-          if (wasPlaying) {
-            setTimeout(() => {
-              midiPlayerRef.current.play();
-            }, 50);
-          }
-        } catch (err) {
-          console.error("Error seeking:", err);
-        }
-      }
-    }
-  };
-
-  // Handle progress bar click
+  // Handle progress bar click for seeking
   const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!midiPlayerRef.current || isLoading || !isInitialized) return;
     
@@ -423,7 +342,43 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
     const percentage = position / rect.width;
     const seekTime = percentage * duration;
     
-    handleSeek(seekTime);
+    const totalTicks = midiPlayerRef.current.getTotalTicks();
+    const tickPosition = Math.floor(percentage * totalTicks);
+
+    const wasPlaying = isPlaying;
+    
+    midiPlayerRef.current.stop();
+    midiPlayerRef.current.skipToTick(tickPosition);
+    setCurrentTime(seekTime);
+
+    if (wasPlaying) {
+      setTimeout(() => {
+        midiPlayerRef.current.play();
+      }, 50);
+    }
+  };
+
+  // Handle volume change through progress bar
+  const handleVolumeClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (isLoading || !isInitialized) return;
+    
+    const volumeBar = e.currentTarget;
+    const rect = volumeBar.getBoundingClientRect();
+    const position = e.clientX - rect.left;
+    const percentage = position / rect.width;
+    const newVolume = Math.max(0, Math.min(100, Math.round(percentage * 100)));
+    
+    setVolume(newVolume);
+    if (isMuted && newVolume > 0) {
+      setIsMuted(false);
+    }
+  };
+
+  // Format time display (mm:ss)
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -443,7 +398,7 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
         <div className="grid grid-cols-[1fr_2fr_1fr] gap-4 items-center">
           {/* Current Track Info */}
           <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12 rounded-md overflow-hidden">
+            <div className="relative w-12 h-12 rounded-md overflow-hidden bg-gray-800">
               <Image
                 src={"/placeholder.svg"}
                 alt={midiInfo?.name || "Track"}
@@ -452,8 +407,8 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
               />
             </div>
             <div>
-              <p className="font-medium text-white text-sm">{midiInfo?.name || "Track"}</p>
-              <p className="text-xs text-gray-400">{midiInfo?.genre || "Genre"}</p>
+              <p className="font-medium text-white text-sm">{midiInfo?.name || "No Track Loaded"}</p>
+              <p className="text-xs text-gray-400">{midiInfo?.genre || "MIDI"}</p>
             </div>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <Heart className="h-4 w-4" />
@@ -492,10 +447,13 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
 
             <div className="w-full flex items-center gap-2">
               <span className="text-xs text-gray-400">{formatTime(currentTime)}</span>
-              <div className="w-full relative" onClick={handleProgressClick}>
+              <div 
+                className="w-full relative cursor-pointer" 
+                onClick={handleProgressClick}
+              >
                 <Progress 
-                  value={(currentTime / duration) * 100} 
-                  className="h-1 cursor-pointer" 
+                  value={(currentTime / (duration || 1)) * 100} 
+                  className="h-1" 
                 />
               </div>
               <span className="text-xs text-gray-400">{formatTime(duration)}</span>
@@ -516,7 +474,10 @@ export default function CustomMidiPlayer({ apiEndpoint, midiData }: MidiPlayerPr
                 <Volume2 className="h-4 w-4 text-gray-400" />
               )}
             </Button>
-            <div className="relative w-24">
+            <div 
+              className="relative w-24 cursor-pointer" 
+              onClick={handleVolumeClick}
+            >
               <Progress 
                 value={isMuted ? 0 : volume} 
                 className="h-1" 
